@@ -63,7 +63,6 @@ pipeline {
                 bat 'kubectl get pods -l app=simple-node-demo'
                 bat '''
                 for /f %%i in ('minikube service simple-node-demo-svc --url') do set URL=%%i
-                echo %URL%
                 curl.exe %URL%
                 '''
             }
