@@ -16,7 +16,7 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('docker-cicd')
         IMAGE_NAME            = "ganesh0230/simple-node-demo"
-        IMAGE_TAG              = "${env.BUILD_NUMBER}"
+        IMAGE_TAG              = "latest"
     }
 
     stages {
@@ -39,7 +39,7 @@ pipeline {
         stage('Docker Build') {
             steps {
                 dir('app') {
-                    bat "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -t ${IMAGE_NAME}:latest ."
+                    bat "docker build -t ${IMAGE_NAME}:latest -t ${IMAGE_NAME}:latest ."
                 }
             }
         }
@@ -47,14 +47,13 @@ pipeline {
         stage('Docker Push') {
             steps {
                 bat 'docker login'
-                bat "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
                 bat "docker push ${IMAGE_NAME}:latest"
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
-                bat "kubectl set image deployment/simple-node-demo simple-node-demo=${IMAGE_NAME}:${IMAGE_TAG}"
+                bat "kubectl set image deployment/simple-node-demo simple-node-demo=${IMAGE_NAME}:latest"
                 bat "kubectl rollout status deployment/simple-node-demo --timeout=90s"
             }
         }
@@ -70,7 +69,7 @@ pipeline {
 
     post {
         success {
-            echo "Pipeline succeeded -- ${IMAGE_NAME}:${IMAGE_TAG} is live on Kubernetes"
+            echo "Pipeline succeeded -- ${IMAGE_NAME}:latest is live on Kubernetes"
         }
         failure {
             echo "Pipeline failed -- check the stage logs above"
