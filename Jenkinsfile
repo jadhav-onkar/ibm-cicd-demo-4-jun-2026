@@ -37,8 +37,8 @@ pipeline {
         stage('Install & Test') {
             steps {
                 dir('app') {
-                    sh 'npm install'
-                    sh 'npm test'
+                    bat 'npm install'
+                    bat 'npm test'
                 }
             }
         }
@@ -46,31 +46,31 @@ pipeline {
         stage('Docker Build') {
             steps {
                 dir('app') {
-                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -t ${IMAGE_NAME}:latest ."
+                    bat "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -t ${IMAGE_NAME}:latest ."
                 }
             }
         }
 
         stage('Docker Push') {
             steps {
-                sh "echo \$DOCKERHUB_CREDENTIALS_PSW | docker login -u \$DOCKERHUB_CREDENTIALS_USR --password-stdin"
-                sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
-                sh "docker push ${IMAGE_NAME}:latest"
+                bat "echo \$DOCKERHUB_CREDENTIALS_PSW | docker login -u \$DOCKERHUB_CREDENTIALS_USR --password-stdin"
+                bat "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                bat "docker push ${IMAGE_NAME}:latest"
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh "kubectl set image deployment/simple-node-demo simple-node-demo=${IMAGE_NAME}:${IMAGE_TAG} --record"
-                sh "kubectl rollout status deployment/simple-node-demo --timeout=90s"
+                bat "kubectl set image deployment/simple-node-demo simple-node-demo=${IMAGE_NAME}:${IMAGE_TAG} --record"
+                bat "kubectl rollout status deployment/simple-node-demo --timeout=90s"
             }
         }
 
         stage('Verify') {
             steps {
-                sh "kubectl get pods -l app=simple-node-demo"
+                bat "kubectl get pods -l app=simple-node-demo"
                 // Docker Desktop's Kubernetes exposes NodePort services on localhost directly
-                sh "curl -s http://localhost:30080/health || true"
+                bat "curl -s http://localhost:30080/health || true"
             }
         }
     }
