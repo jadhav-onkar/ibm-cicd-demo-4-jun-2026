@@ -62,7 +62,7 @@ pipeline {
             steps {
                 bat "kubectl get pods -l app=simple-node-demo"
                 // Docker Desktop's Kubernetes exposes NodePort services on localhost directly
-                bat "curl.exe -s http://localhost:30080/health"
+                bat "curl.exe -s http://127.0.0.1:53487/"
             }
         }
     }
